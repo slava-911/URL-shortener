@@ -1,0 +1,43 @@
+### Get user links
+
+GET http://localhost:10001/links
+Accept: application/json
+Authorization: Bearer {{auth_token}}
+
+### Create link
+
+POST http://localhost:10001/links
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "full_version": "https://ru.m.wikipedia.org/wiki/%D0%97%D0%B0%D0%B4%D0%B0%D1%87%D0%B0_%D0%BE_%D1%80%D1%8E%D0%BA%D0%B7%D0%B0%D0%BA%D0%B5",
+  "description": "First link! Задача о рюкзаке"
+}
+
+### Get link by ID
+
+GET http://localhost:10001/links/66cd85cf-ba90-4267-8293-fea87ff72f81
+Accept: application/json
+Authorization: Bearer {{auth_token}}
+
+### Update link
+
+PATCH http://localhost:10001/links/66cd85cf-ba90-4267-8293-fea87ff72f81
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "description": "Задача о рюкзаке"
+}
+
+### Delete link
+
+DELETE http://localhost:10001/links/66cd85cf-ba90-4267-8293-fea87ff72f81
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+### Get link by short version
+
+GET http://localhost:10001/s/AZdSVbF
+Content-Type: application/json

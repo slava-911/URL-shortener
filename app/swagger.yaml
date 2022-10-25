@@ -1,0 +1,462 @@
+openapi: 3.0.3
+info:
+  title: URL shortener API
+  description:
+    URL shortener (“сокращатель ссылок”) - это сервис, позволяющий пользователю генерировать для произвольного URL его
+    короткую версию, которую удобно вставлять в различные публикации, сообщения, новости, промо-материалы и так далее.
+    Также сервис позволяет получать статистику переходов по каждому сгенерированному URL, что будет полезно, если его
+    владелец захочет узнать сколько раз был совершен переход по короткой ссылке.
+  contact:
+    email: stopala91@gmail.com
+  version: 1.0.0
+servers:
+  - url: localhost:10001
+tags:
+  - name: link
+    description: Link - main entity
+  - name: user
+    description: Operations about user
+components:
+  headers:
+    RequestSuccess:
+      schema:
+        type: string
+      description: If the application has successfully processed the request, it returns success. If an error occurs
+        during the processing of the request, it returns fail."
+  responses:
+    minimalResponse:
+      description: OK
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: Resource Already Exist
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ImaTeapot:
+      description: Code Execution Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InternalError:
+      description: Internal Server Error
+  schemas:
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        error_code:
+          type: string
+        developer_message:
+          type: string
+      required:
+        - error_code
+        - message
+        - developer_message
+    Link:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_version:
+          type: string
+        short_version:
+          type: string
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        clicked:
+          type: integer
+          format: int32
+        user_id:
+          type: string
+    CreateLink:
+      type: object
+      properties:
+        full_version:
+          type: string
+        description:
+          type: string
+        user_id:
+          type: string
+    UpdateLink:
+      type: object
+      properties:
+        full_version:
+          type: string
+        description:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+          format: password
+    CreateUser:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        repeat_password:
+          type: string
+    UpdateUser:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        old_password:
+          type: string
+        new_password:
+          type: string
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+        refresh_token:
+          type: string
+  securitySchemes:
+    api_key:
+      in: header
+      name: Authorization
+      type: apiKey
+paths:
+  /auth:
+    post:
+      summary: Auth by email and password and get access and refresh tokens
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      description: Авторизация пользователя, получение токена доступа к методам API
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+        '401':
+          $ref: "#/components/responses/Unauthorized"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '418':
+          $ref: "#/components/responses/ImaTeapot"
+        '500':
+          $ref: "#/components/responses/InternalError"
+    put:
+      summary: Get access using refresh token
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/Token"
+                - required:
+                    - refresh_token
+      description: Авторизация пользователя, обмен refresh_token на access_token для доступа к методам API
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+        '401':
+          $ref: "#/components/responses/Unauthorized"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '418':
+          $ref: "#/components/responses/ImaTeapot"
+        '500':
+          $ref: "#/components/responses/InternalError"
+  /signup:
+    post:
+      summary: Create new user
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/CreateUser"
+      description: Авторизация пользователя, получение токена доступа к методам API
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+        '401':
+          $ref: "#/components/responses/Unauthorized"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '418':
+          $ref: "#/components/responses/ImaTeapot"
+        '500':
+          $ref: "#/components/responses/InternalError"
+  /profile:
+    get:
+      summary: Get user
+      tags:
+        - user
+      description: Получение пользователя
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '418':
+          $ref: "#/components/responses/ImaTeapot"
+        '500':
+          $ref: "#/components/responses/InternalError"
+      security:
+        - api_key: [ ]
+    patch:
+      summary: Partially update user
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUser"
+      description: Частичное обновление пользователя (можно обновить не все поля)
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '409':
+          $ref: "#/components/responses/Conflict"
+        '418':
+          $ref: "#/components/responses/ImaTeapot"
+        '500':
+          $ref: "#/components/responses/InternalError"
+      security:
+        - api_key: [ ]
+    delete:
+      summary: Delete user
+      tags:
+        - user
+      description: Удаление пользователя
+      responses:
+        '204':
+          description: No Content
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '418':
+          $ref: "#/components/responses/ImaTeapot"
+        '500':
+          $ref: "#/components/responses/InternalError"
+      security:
+        - api_key: [ ]
+  /links:
+    get:
+      summary: Get all user links
+      tags:
+        - link
+      description: Получение всех ссылок пользователя
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Link"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '418':
+          $ref: "#/components/responses/ImaTeapot"
+        '500':
+          $ref: "#/components/responses/InternalError"
+      security:
+        - api_key: [ ]
+    post:
+      summary: Create link
+      tags:
+        - link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLink"
+      description: Создание новой ссылки
+      responses:
+        '201':
+          headers:
+            Location:
+              schema:
+                type: string
+              description: uri of new object
+          description: Created
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '409':
+          $ref: "#/components/responses/Conflict"
+        '418':
+          $ref: "#/components/responses/ImaTeapot"
+        '500':
+          $ref: "#/components/responses/InternalError"
+      security:
+        - api_key: [ ]
+  /links/{id}:
+    get:
+      summary: Get link by ID
+      tags:
+        - link
+      description: Получение ссылки по ее ID
+      parameters:
+        - name: id
+          in: path
+          description: ID of link that needs to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Link"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '418':
+          $ref: "#/components/responses/ImaTeapot"
+        '500':
+          $ref: "#/components/responses/InternalError"
+      security:
+        - api_key: [ ]
+    patch:
+      summary: Partially update link
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      tags:
+        - link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLink"
+      description: Частичное обновление ссылки (можно обновить не все поля)
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '409':
+          $ref: "#/components/responses/Conflict"
+        '418':
+          $ref: "#/components/responses/ImaTeapot"
+        '500':
+          $ref: "#/components/responses/InternalError"
+      security:
+        - api_key: [ ]
+    delete:
+      summary: Delete link by id
+      tags:
+        - link
+      description: Удаление ссылки по id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '418':
+          $ref: "#/components/responses/ImaTeapot"
+        '500':
+          $ref: "#/components/responses/InternalError"
+      security:
+        - api_key: [ ]
+  /s/{short_version}:
+    get:
+      summary: Get the full version of the link from its short version and redirecting to it
+      tags:
+        - link
+      description: Получить полную версию ссылки по ее короткой версии и перейти по ней
+      parameters:
+        - name: short_version
+          in: path
+          description: short version of link that needs to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        '307':
+          headers:
+            Location:
+              schema:
+                type: string
+              description: redirected
+          description: redirected
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '418':
+          $ref: "#/components/responses/ImaTeapot"
+        '500':
+          $ref: "#/components/responses/InternalError"

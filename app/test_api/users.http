@@ -1,0 +1,23 @@
+### Update user
+
+PATCH http://localhost:10001/profile
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "name": "Ivan",
+  "old_password": "qaz123",
+  "new_password": "qaz12345"
+}
+
+### Delete user
+
+DELETE http://localhost:10001/profile
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+### Get user by ID
+
+GET http://localhost:10001/users/65232169-a86d-4074-9a0e-4704cfbef2d4
+Accept: application/json
+Authorization: Bearer {{auth_token}}

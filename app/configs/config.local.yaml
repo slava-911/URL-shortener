@@ -1,0 +1,41 @@
+---
+
+http:
+  ip: 0.0.0.0
+  port: 10001
+  read_timeout: 15s
+  write_timeout: 15s
+  cors:
+    debug: true
+    allowed_methods: ["GET", "POST", "PATCH", "PUT", "OPTIONS", "DELETE"]
+    allowed_origins:
+      - "http://localhost:3000"
+      - "http://localhost:8080"
+      - "https://editor.swagger.io"
+    allow_credentials: true
+    allowed_headers:
+      - "Authorization"
+      - "Location"
+      - "Charset"
+      - "Access-Control-Allow-Origin"
+      - "Content-Type"
+      - "Origin"
+      - "Accept"
+      - "Content-Length"
+      - "Accept-Encoding"
+      - "X-CSRF-Token"
+      - "api_key"
+    options_passthrough: true
+    exposed_headers:
+      - "Location"
+      - "Authorization"
+      - "Content-Disposition"
+
+#AllowedMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodOptions, http.MethodDelete},
+#AllowedOrigins:     []string{"http://localhost:3000", "http://localhost:8080"},
+#AllowCredentials:   true,
+#AllowedHeaders:     []string{"Location", "Charset", "Access-Control-Allow-Origin", "Content-Type", "content-type", "Origin", "Accept", "Content-Length", "Accept-Encoding", "X-CSRF-Token"},
+#OptionsPassthrough: true,
+#ExposedHeaders:     []string{"Location", "Authorization", "Content-Disposition"},
+#// Enable Debugging for testing, consider disabling in production
+#Debug: false,

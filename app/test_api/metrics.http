@@ -1,0 +1,4 @@
+###
+
+GET http://localhost:10001/heartbeat
+Accept: application/json
